@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GreenWalk',
-      theme: ThemeData(primarySwatch: Colors.green[100]),
+      theme: ThemeData(primarySwatch: Colors.green),
       home: FeedPage(title: 'Feed'),
     );
   }
