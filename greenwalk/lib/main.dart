@@ -1,40 +1,63 @@
+/// Flutter code sample for BottomNavigationBar
+
+// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
+// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
+// widgets and the [currentIndex] is set to index 0. The selected item is
+// amber. The `_onItemTapped` function changes the selected item's index
+// and displays a corresponding message in the center of the [Scaffold].
+//
+// ![A scaffold with a bottom navigation bar containing three bottom navigation
+// bar items. The first one is selected.](https://flutter.github.io/assets-for-api-docs/assets/material/bottom_navigation_bar.png)
+
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(GreenWalkApp());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+/// This is the main application widget.
+class GreenWalkApp extends StatelessWidget {
+  static const String _title = 'Flutter Code Sample';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GreenWalk',
-      theme: ThemeData(primarySwatch: Colors.green),
-      home: FeedPage(title: 'Feed'),
+      title: _title,
+      home: MainStatefulWidget(),
     );
   }
 }
 
-class FeedPage extends StatefulWidget {
-  FeedPage({Key key, this.title}) : super(key: key);
-  final String title;
+/// This is the stateful widget that the main application instantiates.
+class MainStatefulWidget extends StatefulWidget {
+  MainStatefulWidget({Key key}) : super(key: key);
 
   @override
-  _FeedPageState createState() => _FeedPageState();
+  _MainStatefulWidget createState() => _MainStatefulWidget();
 }
 
-class _FeedPageState extends State<FeedPage> {
-  int _counter = -50;
+/// This is the private State class that goes with MyStatefulWidget.
+class _MainStatefulWidget extends State<MainStatefulWidget> {
+  int _selectedIndex = 0;
+  static const TextStyle optionStyle =
+  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+  static const List<Widget> _widgetOptions = <Widget>[
+    Text(
+      'Index 0: Home',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 1: Business',
+      style: optionStyle,
+    ),
+    Text(
+      'Index 2: School',
+      style: optionStyle,
+    ),
+  ];
 
-  void _incrementCounter() {
+  void _onItemTapped(int index) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _selectedIndex = index;
     });
   }
 
@@ -42,34 +65,30 @@ class _FeedPageState extends State<FeedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text('BottomNavigationBar Sample'),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              height: 25.0,
-              color: Colors.blue,
-              
-              child: Column(
-                children: <Widget>[
-                  Text('You have pushed the button this many times: ')
-                ],
-              ),
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+        child: _widgetOptions.elementAt(_selectedIndex),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.heartbeat),
+            label: 'Activity',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Feed',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'School',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
+      ),
     );
   }
 }
