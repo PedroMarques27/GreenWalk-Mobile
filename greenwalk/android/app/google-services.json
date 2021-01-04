@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "757772010649",
+    "project_id": "greenwalk-c60ce",
+    "storage_bucket": "greenwalk-c60ce.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757772010649:android:70560b2ca47c8c949f6408",
+        "android_client_info": {
+          "package_name": "icm.project.greenwalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757772010649-jotn8rtqttrihp817dh5jl66v8ptamf4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAaTGmJNyB9ikM54tV2W0E2wOsTspE5gvU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757772010649-jotn8rtqttrihp817dh5jl66v8ptamf4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757772010649-i1jmb1sq2c5nb0vakakllvbmrab66m08.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "icm.project.greenwalk"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

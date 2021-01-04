@@ -1,8 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="icm.project.greenwalk">
+    <uses-permission android:name=
+        "android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name=
+        "android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="greenwalk"
         android:icon="@mipmap/ic_launcher">
+
+       <meta-data
+           android:name="com.google.android.geo.API_KEY"
+           android:value="AIzaSyB1PjG95t0ktyk54y8JL3p8SAQzol3K3Ro" />
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -18,6 +28,7 @@
               android:name="io.flutter.embedding.android.NormalTheme"
               android:resource="@style/NormalTheme"
               />
+
             <!-- Displays an Android View that continues showing the launch screen
                  Drawable until Flutter paints its first frame, then this splash
                  screen fades out. A splash screen is useful to avoid any visual
