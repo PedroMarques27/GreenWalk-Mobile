@@ -1,46 +1,54 @@
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-/// Flutter code sample for BottomNavigationBar
-
-// This example shows a [BottomNavigationBar] as it is used within a [Scaffold]
-// widget. The [BottomNavigationBar] has three [BottomNavigationBarItem]
-// widgets and the [currentIndex] is set to index 0. The selected item is
-// amber. The `_onItemTapped` function changes the selected item's index
-// and displays a corresponding message in the center of the [Scaffold].
-//
-// ![A scaffold with a bottom navigation bar containing three bottom navigation
-// bar items. The first one is selected.](https://flutter.github.io/assets-for-api-docs/assets/material/bottom_navigation_bar.png)
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:location/location.dart' as Location;
-import 'package:geolocator/geolocator.dart';
-import 'package:android_intent/android_intent.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:workmanager/workmanager.dart';
 import 'Authentication.dart';
-import 'LocationService.dart';
 import 'MainViewModel.dart';
-import 'SignIn.dart';
-import 'activity.dart';
-import 'profile.dart';
-import 'feed.dart';
-
+import 'Activity.dart';
+import 'Profile.dart';
+import 'Feed.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  runApp(MaterialApp(
-    title: "Greenwalk",
+  runApp(Phoenix(
+    child: MaterialApp(
+      theme: ThemeData(
+        // Define the default brightness and colors.
+        brightness: Brightness.light,
+        primaryColor: Colors.green[600],
+        accentColor: Colors.cyan[600],
+
+        // Define the default font family.
+        fontFamily: 'Georgia',
+
+        // Define the default TextTheme. Use this to specify the default
+        // text styling for headlines, titles, bodies of text, and more.
+        textTheme: TextTheme(
+          headline1: TextStyle(fontSize: 72.0, fontWeight: FontWeight.bold),
+          headline6: TextStyle(fontSize: 36.0, fontStyle: FontStyle.italic),
+          bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
+        ),
+      ),
+
+      title: "Greenwalk",
     home: App(),
     debugShowCheckedModeBanner: false,
-  ));
+  )));
 }
 
 class App extends StatelessWidget {
@@ -65,38 +73,116 @@ class MainStatefulWidget extends StatefulWidget {
 class _MainStatefulWidget extends State<MainStatefulWidget> {
   SharedPreferences prefs;
   bool isUserSignedIn = false;
-
+  String email;
   int _selectedIndex = 1;
-  final List<Widget> _children = [
-    ActivityScreen(),
-    FeedScreen(),
-    ProfileScreen()
-  ];
+  User1 currentUser;
 
   final PermissionHandler permissionHandler = PermissionHandler();
   Map<PermissionGroup, PermissionStatus> permissions;
+  List<Widget> _children = [
+  ];
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  void _requestPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+  String messageTitle = "Empty";
+  String notificationAlert = "alert";
+
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  FlutterLocalNotificationsPlugin fltrNotification =new FlutterLocalNotificationsPlugin();
+  String task;
+  int val;
 
   @override
   void initState() {
     super.initState();
-
+    var androidInitilize = new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iOSinitilize = new IOSInitializationSettings();
+    var initilizationsSettings =
+    new InitializationSettings(android: androidInitilize, iOS: iOSinitilize);
     Provider.of<MainViewModel>(context, listen: false).start();
-    __init__();
+
+
+
+    fltrNotification.initialize(initilizationsSettings).then((value) {
+      init();
+      __init__();
+    });
+
   }
+
+  Future _showNotification(aqi, tip) async {
+    var androidDetails = new AndroidNotificationDetails(
+        "GreenWalk", "GreenWalk AQI Notification", "Tip",
+        importance: Importance.max);
+    var iSODetails = new IOSNotificationDetails();
+    var generalNotificationDetails =
+    new NotificationDetails(android: androidDetails, iOS: iSODetails);
+
+    String finalString = "AQI: "+aqi + "\n "+tip;
+    fltrNotification.schedule(
+        1, finalString, task, DateTime.now().add(Duration(seconds: 10)), generalNotificationDetails);
+  }
+
+
 
   Future<void> __init__() async {
     prefs = await SharedPreferences.getInstance();
+
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(
+            sound: true, badge: true, alert: true, provisional: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
     if (prefs.getString('email') == null) {
-      Navigator.push(
+      email = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => Authentication()),
       );
     }
+    email = prefs.getString('email');
+    await requestCameraPermission();
     await requestLocationPermission();
     await requestActivityRecognitionPermission();
+    await _requestPermissions();
+
+    setState(() {
+      _children = [
+        ActivityScreen(),
+        FeedScreen(fltrNotification),
+        ProfileScreen()
+      ];
+    });
+
+
+
+
   }
 
-  Future<bool> _requestPermission(PermissionGroup permission) async {
+
+
+
+Future<bool> _requestPermission(PermissionGroup permission) async {
     final PermissionHandler _permissionHandler = PermissionHandler();
     var result = await _permissionHandler.requestPermissions([permission]);
     if (result[permission] == PermissionStatus.granted) {
@@ -104,6 +190,15 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
     }
     return false;
   }
+  Future<bool> requestCameraPermission({Function onPermissionDenied}) async {
+    var granted = await _requestPermission(PermissionGroup.camera);
+    if (granted != true) {
+      requestCameraPermission();
+    }
+    debugPrint('requestCameraPermission $granted');
+    return granted;
+  }
+
 
 /*Checking if your App has been Given Permission*/
   Future<bool> requestLocationPermission({Function onPermissionDenied}) async {
@@ -111,7 +206,7 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
     if (granted != true) {
       requestLocationPermission();
     }
-    debugPrint('requestContactsPermission $granted');
+    debugPrint('requestLocationPermission $granted');
     return granted;
   }
 
@@ -125,15 +220,43 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
     return granted;
   }
 
+
+
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  bool _initialized = false;
+
+  Future<void> init() async {
+    if (!_initialized) {
+      // For iOS request permission first.
+
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(
+              sound: true, badge: true, alert: true, provisional: true));
+      _firebaseMessaging.configure();
+      // For testing purposes print the Firebase Messaging token
+      String token = await _firebaseMessaging.getToken();
+      debugPrint("FirebaseMessaging token: $token");
+      addToken();
+      _initialized = true;
+    }
+  }
+
+  Future<void> addToken() async {
+    final databaseReference = FirebaseDatabase.instance.reference();
+    String token = await _firebaseMessaging.getToken();
+    databaseReference.child('tokens').set({
+        token:'0'}
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final vm = Provider.of<MainViewModel>(context);
 
     return Scaffold(
       appBar: AppBar(title: Text("GreenWalk"), actions: <Widget>[
@@ -141,12 +264,9 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
             padding: EdgeInsets.only(right: 20.0),
             child: GestureDetector(
               onTap: () {
-                prefs.remove('email');
+                prefs.clear();
+                Phoenix.rebirth(context);
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Authentication()),
-                );
               },
               child: Icon(
                 Icons.logout,
@@ -157,8 +277,10 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
       body: IndexedStack(
         children: _children,
         index: _selectedIndex,
+
       ),
       bottomNavigationBar: BottomNavigationBar(
+
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.heartbeat),
@@ -180,18 +302,3 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
     );
   }
 }
-
-/*
-ListView.separated(
-padding: const EdgeInsets.all(8),
-itemCount: entries.length,
-itemBuilder: (BuildContext context, int index){
-return Container(
-height: 50,
-color: Colors.amber[colorCodes[index]],
-child: Center(child: Text('Entry ${entries[index]}')),
-);
-},
-separatorBuilder: (BuildContext context, int index) => const Divider(),
-)
-*/

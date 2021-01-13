@@ -16,7 +16,7 @@ import 'package:http/http.dart' as http;
 
 class ActivityViewModel extends ChangeNotifier {
 
-  double totalDistance;
+  double totalDistance = 0;
 
   Position currentLocation;
   AirData currentAirData;
@@ -27,17 +27,30 @@ class ActivityViewModel extends ChangeNotifier {
   int steps ;
   DateTime timestamp;
   Timer scheduler;
+  int AQI;
+  int finalSteps;
   bool recording = false;
+
+
   Future<void> start() async {
     recording = true;
+    finalSteps = null;
     steps = 0;
+    AQI = 0;
     totalDistance = 0;
+    airData.clear();
     timestamp = DateTime.now();
     initPlatformState();
     locationStream.listen((position) {
       if (recording){
+        currentLocation = position;
         locations.add(LatLng(position.latitude, position.longitude));
         notifyListeners();
+        fetchAQI().then((value){
+          airData.add(value);
+          AQI = value.data.last.aqi.toInt();
+          notifyListeners();
+        });
       }
 
     });
@@ -45,6 +58,12 @@ class ActivityViewModel extends ChangeNotifier {
     scheduler = Timer.periodic(new Duration(seconds: 45), (timer) {
       fetchAQI().then((value){
         airData.add(value);
+        int sum = 0;
+
+        for (AirData air in airData){
+          sum+=air.data.last.aqi.toInt();
+        }
+        AQI = (sum/airData.length).floor();
         notifyListeners();
       });
     });
@@ -53,16 +72,14 @@ class ActivityViewModel extends ChangeNotifier {
 
   void onStepCount(StepCount event) {
     if (recording){
-      if (steps == 0){
-        steps = event.steps;
+      if (finalSteps == null){
+        finalSteps = event.steps;
       }
       if (event.timeStamp.isAfter(timestamp)){
-        int toAdd = event.steps-steps;
-        steps = toAdd;
+        steps = event.steps-finalSteps;
+        notifyListeners();
       }
       calculateDistance(steps);
-
-      notifyListeners();
     }
 
 
@@ -79,11 +96,13 @@ class ActivityViewModel extends ChangeNotifier {
           break;
         case 'M':
           totalDistance = (count * 78) /100000;
+
           break;
 
       }
     }
-
+    totalDistance = double.parse(totalDistance.toStringAsFixed(2));
+    notifyListeners();
 
   }
 
@@ -102,6 +121,7 @@ class ActivityViewModel extends ChangeNotifier {
   void stop(){
     scheduler.cancel();
     recording = false;
+
   }
 
 
@@ -110,7 +130,7 @@ class ActivityViewModel extends ChangeNotifier {
     String longitude = currentLocation.longitude.toString();
     var response =
     await http.get('https://api.weatherbit.io/v2.0/current/airquality?'
-        'lat=$latitude&lon=$longitude&key=961c6a4baa7b4f2e92b04cc7ee42354b');
+        'lat=$latitude&lon=$longitude&key=d367b455453f495d88622c24e902bc4e');
     if (response.statusCode == 200) {
       return AirData.fromJson(jsonDecode(response.body));
     } else {

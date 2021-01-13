@@ -8,6 +8,10 @@
     <array>
         <string>processing</string>
     </array>
+    <key>NSCameraUsageDescription</key>
+    <string>Enable myApp to access your camera to capture your photo</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Enable myApp to access mic to record your voice</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>When In Use Permission</string>
     <key>NSLocationAlwaysUsageDescription</key>

@@ -44,9 +44,23 @@ dependencies:
   mvvm: ^0.1.8
   firebase_database: ^4.4.0
   firebase_auth: ^0.18.4+1
+  camera: ^0.6.3+2
+  path_provider: ^1.6.24
+  path: ^1.7.0
+  image_picker: ^0.6.7+17
+  firebase_storage: ^4.0.0-dev.1
+  flutter_phoenix: ^0.1.0
+  fluttertoast: ^3.1.0
+  firebase_messaging: ^7.0.3
+  flutter_cache_manager: ^2.1.0
+  flutter_local_notifications: ^3.0.3
+  workmanager: ^0.2.3
+  cron: ^0.2.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

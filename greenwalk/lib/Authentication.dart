@@ -1,6 +1,9 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'MainViewModel.dart';
 
 class Authentication extends StatefulWidget {
   @override
@@ -36,6 +39,7 @@ class _LoginPageState extends State<Authentication> {
   void __init__() async {
     await getData();
     prefs = await SharedPreferences.getInstance();
+
   }
 
 
@@ -138,7 +142,6 @@ class _LoginPageState extends State<Authentication> {
               child: new TextField(
                 controller: _usernameFilter,
                 decoration: new InputDecoration(labelText: 'Username'),
-                obscureText: true,
               ),
             ),
             new DropdownButton<String>(
@@ -173,7 +176,7 @@ class _LoginPageState extends State<Authentication> {
   Widget _buildButtons() {
 
     if (_form == FormType.login) {
-      return new Container(
+      return Center(child: new Container(
         child: new Column(
           children: <Widget>[
             new RaisedButton(
@@ -182,10 +185,11 @@ class _LoginPageState extends State<Authentication> {
             ),
             new FlatButton(
               child: new Text('Tap here to register.'),
-              onPressed: _formChange,
+              onPressed:  _formChange,
             ),
           ],
         ),
+      )
       );
     } else {
       return new Container(
@@ -211,9 +215,10 @@ class _LoginPageState extends State<Authentication> {
     if (users.containsKey(_email)){
       Map<dynamic, dynamic> userValues = users[_email];
       if (userValues['password']==_password){
-        Navigator.pop(context);
+
         prefs.setString('email', _email);
         prefs.setString('gender', userValues['gender']);
+        Navigator.pop(context, _email);
       }
 
     }
@@ -229,7 +234,7 @@ class _LoginPageState extends State<Authentication> {
         });
         prefs.setString('email', _email);
         prefs.setString('gender', gender[0]);
-        Navigator.pop(context);
+        Navigator.pop(context, _email);
       }
 
     }
