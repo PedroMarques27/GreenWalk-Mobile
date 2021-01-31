@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'MainViewModel.dart';
+import '../MainViewModel.dart';
 
 class Authentication extends StatefulWidget {
   @override

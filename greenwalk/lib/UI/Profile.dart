@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'MainViewModel.dart';
+import '../Entities/ActivityClass.dart';
+import '../FlutterBlocs/DataBloc.dart';
+import '../MainViewModel.dart';
 import 'ActivityDetails.dart';
 import 'Activity.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,13 +35,10 @@ class _UserProfilePageState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    __init__();
     super.initState();
   }
 
-  void __init__() async {
 
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +74,7 @@ class _UserProfilePageState extends State<ProfileScreen> {
   List<Activity> activities = new List<Activity>();
 
   Widget BuildBody(BuildContext context, MainViewModel vm) {
-    return Container(child: _buildList(context, filter(vm.activities), vm));
+    return Container(child: _buildList(context, vm));
   }
 
   List<Activity> filter(List<Activity> activities) {
@@ -87,42 +86,55 @@ class _UserProfilePageState extends State<ProfileScreen> {
     return filtered;
   }
 
-  Widget _buildList(BuildContext context, List<Activity> snapshot, MainViewModel vm) {
-    return CustomScrollView(primary: false, slivers: <Widget>[
-      SliverPadding(
-          padding: const EdgeInsets.all(20),
-          sliver: SliverGrid.count(
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            crossAxisCount: 2,
-            children: snapshot.map((data) {
-              if (data.user_email == currentUser.email) {
-                Color toSelect;
-                if (data.AQI <= 50) {
-                  toSelect = Color.fromARGB(100, 16, 204, 10);
-                } else if (data.AQI <= 100 && data.AQI > 50) {
-                  toSelect = Color.fromARGB(100, 244, 208, 63);
-                } else if (data.AQI <= 150 && data.AQI > 100) {
-                  toSelect = Color.fromARGB(100, 243, 156, 18);
-                } else if (data.AQI <= 200 && data.AQI > 150) {
-                  toSelect = Color.fromARGB(100, 231, 76, 60);
-                } else if (data.AQI <= 300 && data.AQI > 200) {
-                  toSelect = Color.fromARGB(100, 142, 68, 173);
-                } else if (data.AQI > 300) {
-                  toSelect = Color.fromARGB(100, 100, 30, 22);
-                }
 
-                return GestureDetector(
-                  child: _buildListItem(context, data, toSelect),
-                  onTap: () {
-                    goToDetailsPage(context, data, vm);
-                  },
-                );
-              }
-            }).toList(),
-          ))
-    ]);
+
+  Widget _buildList(BuildContext context, MainViewModel vm) {
+    User1 cu = vm.currentUser;
+    return StreamBuilder(
+      // Wrap our widget with a StreamBuilder
+        stream: Databloc.getAllActivities,
+
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return Container();
+          List<Activity> current = filterByUser(snapshot.data,cu);
+          debugPrint(current.toString());
+          final vm = Provider.of<MainViewModel>(context);
+
+          return CustomScrollView(primary: false, slivers: <Widget>[
+            SliverPadding(
+                padding: const EdgeInsets.all(20),
+                sliver: SliverGrid.count(
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  crossAxisCount: 2,
+                  children: current.map((data) {
+                    Color toSelect;
+                    if (data.AQI <= 50) {
+                      toSelect = Color.fromARGB(100, 16, 204, 10);
+                    } else if (data.AQI <= 100 && data.AQI > 50) {
+                      toSelect = Color.fromARGB(100, 244, 208, 63);
+                    } else if (data.AQI <= 150 && data.AQI > 100) {
+                      toSelect = Color.fromARGB(100, 243, 156, 18);
+                    } else if (data.AQI <= 200 && data.AQI > 150) {
+                      toSelect = Color.fromARGB(100, 231, 76, 60);
+                    } else if (data.AQI <= 300 && data.AQI > 200) {
+                      toSelect = Color.fromARGB(100, 142, 68, 173);
+                    } else if (data.AQI > 300) {
+                      toSelect = Color.fromARGB(100, 100, 30, 22);
+                    }
+
+                    return GestureDetector(
+                      child: _buildListItem(context, data, toSelect),
+                      onTap: () {
+                        goToDetailsPage(context, data, vm);
+                      },
+                    );
+                  }).toList(),
+                ))
+          ]);
+        });
   }
+
 
   goToDetailsPage(BuildContext context, Activity activity, MainViewModel vm) {
     Navigator.push(
@@ -134,7 +146,6 @@ class _UserProfilePageState extends State<ProfileScreen> {
 
   Widget _buildListItem(BuildContext context, Activity data, Color color) {
     return Padding(
-      key: ValueKey(data.type),
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       child: Container(
           decoration: BoxDecoration(
@@ -248,6 +259,14 @@ class _UserProfilePageState extends State<ProfileScreen> {
           );
         });
   }
+  List<Activity> filterByUser(List<Activity> temp, User1 currentUser) {
+    debugPrint(currentUser.email);
+    debugPrint(temp.toString());
+    temp.removeWhere((element) => element.user_email!=currentUser.email);
+    debugPrint(temp.toString());
+    return temp;
+
+  }
 }
 
 class User1 {
@@ -263,4 +282,5 @@ class User1 {
         gender: responseData['gender'],
         image_url: responseData['image_url']);
   }
+
 }

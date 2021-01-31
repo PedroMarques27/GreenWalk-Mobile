@@ -16,11 +16,11 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Activity.dart';
+import '../Entities/ActivityClass.dart';
 
 import 'package:image_picker/image_picker.dart';
-
-import 'MainViewModel.dart';
+import '../Entities/LatLng.dart' as ll;
+import '../MainViewModel.dart';
 import 'Profile.dart';
 
 class ActivityDetails extends StatefulWidget {
@@ -52,7 +52,7 @@ class ActivityDetailsState extends State<ActivityDetails> {
   void initState() {
     super.initState();
     curActivity = widget.curActivity;
-    _center = widget.curActivity.coordinates.last;
+    _center = LatLng(widget.curActivity.coordinates.last.latitude,widget.curActivity.coordinates.last.longitude);
     _centerposition = CameraPosition(target: _center, zoom: 10);
     __init__();
     // ignore: unnecessary_statements
@@ -108,13 +108,12 @@ class ActivityDetailsState extends State<ActivityDetails> {
       curActivity.images.add("TEST");
     }
     databaseReference.child('activities').child(curActivity.id).set({
-      "type": curActivity.type,
       "date": curActivity.date,
       "time": curActivity.time,
       "steps": curActivity.steps,
       'distance': curActivity.distance,
       'AQI': curActivity.AQI,
-      "coordinates": toList(curActivity.coordinates),
+      "coordinates": (curActivity.coordinates),
       'avgSpeed': curActivity.avgSpeed,
       'user_email': curActivity.user_email,
       'images': curActivity.images,
@@ -235,13 +234,14 @@ class ActivityDetailsState extends State<ActivityDetails> {
   }
 
   setPolylines() async {
+
     setState(() {
       // create a Polyline instance
       // with an id, an RGB color and the list of LatLng pairs
       Polyline polyline = Polyline(
           polylineId: PolylineId("Polyline"),
           color: Color.fromARGB(255, 40, 122, 198),
-          points: curActivity.coordinates);
+          points: toLatLng(curActivity.coordinates));
 
       // add the constructed polyline as a set of points
       // to the polyline set, which will eventually
@@ -399,6 +399,7 @@ class ActivityDetailsState extends State<ActivityDetails> {
                                                 children: <Widget>[
                                                   Image.network(
                                                       curActivity.images[index]),
+                                                  curActivity.user_email==  useremail?
                                                   IconButton(
                                                       padding: EdgeInsets.all(10.0),
                                                       color: Colors.red[200],
@@ -410,7 +411,8 @@ class ActivityDetailsState extends State<ActivityDetails> {
                                                           updateActivity();
                                                         });
                                                       }
-                                                  )
+                                                  ): Text(""),
+
                                                 ])));
                                   },
                                   child: Container(
@@ -423,5 +425,13 @@ class ActivityDetailsState extends State<ActivityDetails> {
                    )
           ]),
         ));
+  }
+
+  toLatLng(List<ll.LatLng> coordinates) {
+    List<LatLng> coords = new List<LatLng>();
+    for (ll.LatLng l in coordinates){
+      coords.add(LatLng(l.latitude, l.longitude));
+    }
+    return coords;
   }
 }

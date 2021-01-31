@@ -1,10 +1,6 @@
-import 'dart:typed_data';
-
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
@@ -13,12 +9,12 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 import 'Authentication.dart';
-import 'MainViewModel.dart';
+import '../MainViewModel.dart';
 import 'Activity.dart';
 import 'Profile.dart';
 import 'Feed.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -32,10 +28,8 @@ void main() async {
         brightness: Brightness.light,
         primaryColor: Colors.green[600],
         accentColor: Colors.cyan[600],
-
         // Define the default font family.
         fontFamily: 'Georgia',
-
         // Define the default TextTheme. Use this to specify the default
         // text styling for headlines, titles, bodies of text, and more.
         textTheme: TextTheme(
@@ -44,7 +38,6 @@ void main() async {
           bodyText2: TextStyle(fontSize: 14.0, fontFamily: 'Hind'),
         ),
       ),
-
       title: "Greenwalk",
     home: App(),
     debugShowCheckedModeBanner: false,
@@ -85,6 +78,8 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
 
+
+
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -123,26 +118,53 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
 
 
     fltrNotification.initialize(initilizationsSettings).then((value) {
-      init();
+      init_fbMessagin();
       __init__();
     });
 
   }
+  final String serverToken = 'AAAAsG67RJk:APA91bFYWMNa0tYqKhH7P-_pAzI8j60T6lwnPHbCurJYwPZ210YlWPbb37hGchyQSAwy7fOaiyOrxZeCl_HjtoKDaO1-RmEx9mOk4D-vJwJc5tP0XXgZZDwBuT8u9cJ934teXTMci0hT';
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
-  Future _showNotification(aqi, tip) async {
-    var androidDetails = new AndroidNotificationDetails(
-        "GreenWalk", "GreenWalk AQI Notification", "Tip",
-        importance: Importance.max);
-    var iSODetails = new IOSNotificationDetails();
-    var generalNotificationDetails =
-    new NotificationDetails(android: androidDetails, iOS: iSODetails);
+    sendAndRetrieveMessage() async {
+    await firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: false),
+    );
 
-    String finalString = "AQI: "+aqi + "\n "+tip;
-    fltrNotification.schedule(
-        1, finalString, task, DateTime.now().add(Duration(seconds: 10)), generalNotificationDetails);
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverToken',
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'this is a body',
+            'title': 'this is a title'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done'
+          },
+          'to': await firebaseMessaging.getToken(),
+        },
+      ),
+    );
+
+    final Completer<Map<String, dynamic>> completer =
+    Completer<Map<String, dynamic>>();
+
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        completer.complete(message);
+      },
+    );
+
+    return completer.future;
   }
-
-
 
   Future<void> __init__() async {
     prefs = await SharedPreferences.getInstance();
@@ -164,7 +186,6 @@ class _MainStatefulWidget extends State<MainStatefulWidget> {
     await requestCameraPermission();
     await requestLocationPermission();
     await requestActivityRecognitionPermission();
-    await _requestPermissions();
 
     setState(() {
       _children = [
@@ -231,7 +252,7 @@ Future<bool> _requestPermission(PermissionGroup permission) async {
 
   bool _initialized = false;
 
-  Future<void> init() async {
+  Future<void> init_fbMessagin() async {
     if (!_initialized) {
       // For iOS request permission first.
 
