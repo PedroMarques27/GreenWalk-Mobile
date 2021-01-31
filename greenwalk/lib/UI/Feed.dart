@@ -50,10 +50,10 @@ class _FeedScreen extends State<FeedScreen> {
     __init__();
 
     fltrNotification = widget.fltrNotification;
-    _showNotification();
+
   }
 
-  Future _showNotification() async {
+  Future _showNotification(double _aqi, String _tip) async {
     var androidDetails = new AndroidNotificationDetails(
         "GreenWalk", "GreenWalk AQI Notification", "Tip",
         importance: Importance.max);
@@ -61,7 +61,7 @@ class _FeedScreen extends State<FeedScreen> {
     var generalNotificationDetails =
         new NotificationDetails(android: androidDetails, iOS: iSODetails);
 
-    String finalString = "AQI: " + aqi + "\n " + tip;
+    String finalString = "AQI: " + _aqi.toString() + "\n " + _tip;
     fltrNotification.schedule(1, "New Greenwalk Report", finalString,
         DateTime.now().add(Duration(minutes: 15)), generalNotificationDetails);
   }
@@ -95,7 +95,7 @@ class _FeedScreen extends State<FeedScreen> {
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
           LocAQIBlocData current = snapshot.data;
-
+          _showNotification(current.aqi, current.tip);
           final vm = Provider.of<MainViewModel>(context);
 
           return Column(

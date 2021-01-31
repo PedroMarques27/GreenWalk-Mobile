@@ -2,9 +2,7 @@ import 'dart:async';
 
 class TimerBloc {
   StreamController<Duration> timerCount = StreamController<Duration>.broadcast();
-
   Stream get getTime => timerCount.stream;
-
   Stopwatch _watch;
   Timer _timer;
   Duration _currentDuration = Duration.zero;
@@ -22,6 +20,7 @@ class TimerBloc {
   void dispose() {
     timerCount.close(); // close our StreamController to avoid memory leak
   }
+
   void _onTick(Timer timer) {
     _currentDuration = _watch.elapsed;
     updateCount();
@@ -46,6 +45,5 @@ class TimerBloc {
     _currentDuration = Duration.zero;
   }
 }
-
 final Timerbloc = TimerBloc(); // create an instance of the counter bloc
 

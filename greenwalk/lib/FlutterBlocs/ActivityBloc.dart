@@ -20,8 +20,10 @@ class ActivityBloc {
   Stream<Duration> timerCount = Timerbloc.getTime;
   Stream<LocAQIBlocData> locationWeatherStream = AQIbloc.getAQI;
 
-  Stream get getActivityDetail => activityStreamController.stream;
+
   StreamController<ActivityDetail> activityStreamController = StreamController<ActivityDetail>.broadcast();
+  Stream get getActivityDetail => activityStreamController.stream;
+
   StreamSubscription<LocAQIBlocData> locAQIsubscription;
   StreamSubscription<Duration> timerSubscription;
   StreamSubscription<StepCount> stepSubscription;

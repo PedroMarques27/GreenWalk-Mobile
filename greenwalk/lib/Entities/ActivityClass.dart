@@ -7,7 +7,6 @@ part 'ActivityClass.g.dart';
 
 @HiveType()
 class Activity {
-
   @HiveField(0)
   String date;
   @HiveField(1)
@@ -16,9 +15,6 @@ class Activity {
   int steps = 0;
   @HiveField(3)
   int AQI;
-
-
-
   @HiveField(4)
   double avgSpeed = 0;
   @HiveField(5)

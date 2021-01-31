@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:greenwalk/Entities/User.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
@@ -240,7 +241,7 @@ class _UserProfilePageState extends State<ProfileScreen> {
                       title: new Text('Photo Library'),
                       onTap: () {
                         _imgFromGallery().then((value) {
-                          vm.uploadImageToFirebase(context, value);
+                          vm.uploadImageToFirebase(value);
                         });
                         Navigator.of(context).pop();
                       }),
@@ -249,7 +250,7 @@ class _UserProfilePageState extends State<ProfileScreen> {
                     title: new Text('Camera'),
                     onTap: () {
                       _imgFromCamera().then(
-                          (value) => vm.uploadImageToFirebase(context, value));
+                          (value) => vm.uploadImageToFirebase(value));
                       Navigator.of(context).pop();
                     },
                   ),
@@ -269,18 +270,4 @@ class _UserProfilePageState extends State<ProfileScreen> {
   }
 }
 
-class User1 {
-  String email, username, password, gender;
-  String image_url;
 
-  User1({this.email, this.password, this.username, this.gender, this.image_url});
-
-  factory User1.fromMap(Map<dynamic, dynamic> responseData) {
-    return User1(
-        password: responseData['password'],
-        username: responseData['username'],
-        gender: responseData['gender'],
-        image_url: responseData['image_url']);
-  }
-
-}

@@ -14,6 +14,7 @@ import 'package:path/path.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'Entities/AQI.dart';
+import 'Entities/User.dart';
 import 'UI/Activity.dart';
 import 'Entities/ActivityClass.dart';
 import 'package:http/http.dart' as http;
@@ -23,13 +24,8 @@ import 'UI/Profile.dart';
 
 class MainViewModel extends ChangeNotifier {
   final databaseReference = FirebaseDatabase.instance.reference();
-  List<Activity> activities = new List<Activity>();
-
-  AirData currentAirData;
   User1 currentUser;
 
-  String tip;
-  Color toSelect;
 
   Future<void> start() async {
     saveToken();
@@ -55,8 +51,7 @@ class MainViewModel extends ChangeNotifier {
     });
     notifyListeners();
   }
-
-  Future uploadImageToFirebase(BuildContext context, File _imageFile) async {
+  Future uploadImageToFirebase(File _imageFile) async {
     String fileName = basename(_imageFile.path);
     StorageReference firebaseStorageRef =
     FirebaseStorage.instance.ref().child('uploads/$fileName');
@@ -67,17 +62,22 @@ class MainViewModel extends ChangeNotifier {
       updateUser();
     });
   }
-
   List<String> tokens = new List<String>();
   Future<List> getTokens() async {
     final databaseReference = FirebaseDatabase.instance.reference();
     var newReference = databaseReference.child('tokens');
     newReference.once().then((DataSnapshot snapshot) {
-      debugPrint(snapshot.value.toString() + "----------------------------------------------");
-      Map<dynamic, dynamic> values = snapshot.value;
-      for (String key in values.keys) {
-        tokens.add(key);
+      try{
+        Map<dynamic, dynamic> values = snapshot.value;
+        for (String key in values.keys) {
+          tokens.add(key);
+        }
+      }catch(e){
+        String values = snapshot.value;
+        tokens.add(values);
       }
+
+
       return tokens;
     });
   }

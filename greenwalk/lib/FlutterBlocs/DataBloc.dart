@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greenwalk/Entities/ActivityClass.dart';
 import 'package:greenwalk/Entities/LatLng.dart';
@@ -31,8 +32,8 @@ class DataBloc {
     Hive.init(appDocumentDir.path);
     Hive.registerAdapter(ActivityAdapter());
     Hive.registerAdapter(LatLngAdapter());
-
     getData();
+    debugPrint("-------------------------------------GETTING DATA");
   }
 
 

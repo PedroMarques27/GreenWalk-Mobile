@@ -7,6 +7,7 @@ import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:greenwalk/Entities/User.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Authentication.dart';

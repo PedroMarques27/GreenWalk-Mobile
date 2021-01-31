@@ -12,7 +12,6 @@ import 'package:http/http.dart' as http;
 class AQIBloc {
 
   StreamController<LocAQIBlocData> aqiStreamController = StreamController<LocAQIBlocData>.broadcast();
-
   Stream get getAQI => aqiStreamController.stream;
 
   AirData currentAirData;

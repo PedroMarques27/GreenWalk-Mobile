@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:greenwalk/Entities/User.dart';
 import 'package:rxdart/rxdart.dart';
 import '../Entities/LatLng.dart' as ll;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
