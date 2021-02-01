@@ -180,7 +180,11 @@ class ActivityDetailsState extends State<ActivityDetails> {
   }
 
   void _onMapCreated(GoogleMapController controller) {
-    _controller.complete(controller);
+    try{
+      _controller.complete(controller);
+    }catch(Exception){
+    }
+
   }
 
   User1 currentActivityUser;
@@ -305,13 +309,8 @@ class ActivityDetailsState extends State<ActivityDetails> {
                 Container(
                   padding: const EdgeInsets.all(5),
                   child: Center(
-                      child: Text((widget.curActivity.time / 3600)
-                              .toInt()
-                              .toString() +
-                          ":" +
-                          (widget.curActivity.time / 60).toInt().toString() +
-                          ":" +
-                          (widget.curActivity.time % 60).toInt().toString())),
+                      child: Text(widget.curActivity.time.toString() +
+                          " seconds")),
                   color: Colors.green[100],
                 ),
                 Container(

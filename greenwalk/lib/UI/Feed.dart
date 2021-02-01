@@ -85,6 +85,7 @@ class _FeedScreen extends State<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Databloc.reset();
     return StreamBuilder(
         // Wrap our widget with a StreamBuilder
         stream: AQIbloc.getAQI,
@@ -130,10 +131,10 @@ class _FeedScreen extends State<FeedScreen> {
 
     return StreamBuilder(
         // Wrap our widget with a StreamBuilder
-        stream: Databloc.getAllPublicActivities,
+        stream: Databloc.getAllActivities,
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
-          List<Activity> current = snapshot.data;
+          List<Activity> current = filterPublic(snapshot.data);
 
           final vm = Provider.of<MainViewModel>(context);
 
@@ -204,6 +205,15 @@ class _FeedScreen extends State<FeedScreen> {
             ]),
           ))),
     );
+  }
+
+  List<Activity> filterPublic(data) {
+    List<Activity> temp2 = new List<Activity>();
+    for (Activity activity in data) {
+      if (activity.isPrivate == false)
+        temp2.add(activity);
+    }
+    return temp2;
   }
 
 

@@ -1,5 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:greenwalk/FlutterBlocs/DataBloc.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -218,6 +219,7 @@ class _LoginPageState extends State<Authentication> {
 
         prefs.setString('email', _email);
         prefs.setString('gender', userValues['gender']);
+        Databloc.reset();
         Navigator.pop(context, _email);
       }
 
@@ -234,6 +236,7 @@ class _LoginPageState extends State<Authentication> {
         });
         prefs.setString('email', _email);
         prefs.setString('gender', gender[0]);
+        Databloc.reset();
         Navigator.pop(context, _email);
       }
 

@@ -67,8 +67,6 @@ class AQIBloc {
     var response =
     await http.get('https://api.weatherbit.io/v2.0/current/airquality?'
         'lat=$latitude&lon=$longitude&key=d367b455453f495d88622c24e902bc4e');
-    debugPrint('https://api.weatherbit.io/v2.0/current/airquality?'
-        'lat=$latitude&lon=$longitude&key=d367b455453f495d88622c24e902bc4e');
 
     if (response.statusCode == 200) {
       AirData airData = AirData.fromJson(jsonDecode(response.body));

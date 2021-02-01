@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:greenwalk/Entities/User.dart';
+import 'package:greenwalk/FlutterBlocs/DataBloc.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Authentication.dart';
@@ -279,6 +280,7 @@ Future<bool> _requestPermission(PermissionGroup permission) async {
 
   @override
   Widget build(BuildContext context) {
+
 
     return Scaffold(
       appBar: AppBar(title: Text("GreenWalk"), actions: <Widget>[

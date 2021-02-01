@@ -6,34 +6,44 @@ import 'package:flutter/cupertino.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:greenwalk/Entities/ActivityClass.dart';
 import 'package:greenwalk/Entities/LatLng.dart';
+import 'package:greenwalk/Entities/User.dart';
 
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 class DataBloc {
   StreamController< List<Activity>> allActivities = StreamController< List<Activity>>.broadcast();
-  StreamController< List<Activity>> allPublicActivities = StreamController< List<Activity>>.broadcast();
 
   Stream get getAllActivities => allActivities.stream;
-  Stream get getAllPublicActivities=> allPublicActivities.stream;
   List<Activity> allActivitiesList;
   List<String> used_ids;
 
+  User1 currentUser;
 
   DataBloc(){
     allActivitiesList = new List<Activity>();
     used_ids = new List<String>();
-    __initdb__();
+    try{
+      __initdb__();
+    }
+    catch(e){
+      getData();
+    }
+
 
   }
 
   __initdb__() async {
     final appDocumentDir = await path_provider.getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
-    Hive.registerAdapter(ActivityAdapter());
-    Hive.registerAdapter(LatLngAdapter());
+    try{
+      Hive.registerAdapter(ActivityAdapter());
+      Hive.registerAdapter(LatLngAdapter());
+    }
+    catch(e){
+    }
+
     getData();
-    debugPrint("-------------------------------------GETTING DATA");
   }
 
 
@@ -52,7 +62,6 @@ class DataBloc {
 
   void updateList() {
     allActivities.sink.add(allActivitiesList);
-    allPublicActivities.sink.add(filterPublic());
      // add whatever data we want into the Sink
   }
 
@@ -88,6 +97,19 @@ class DataBloc {
     });
   }
 
+  void filterByUser(User1 cu) {currentUser = cu;}
+
+  void reset() {
+    allActivitiesList = new List<Activity>();
+    used_ids = new List<String>();
+    try{
+      __initdb__();
+    }catch(Exception){
+      getData();
+    }
+
+    updateList();
+  }
 
 }
 

@@ -88,7 +88,7 @@ class _UserProfilePageState extends State<ProfileScreen> {
   }
 
 
-
+  List<Activity> current = new List<Activity>();
   Widget _buildList(BuildContext context, MainViewModel vm) {
     User1 cu = vm.currentUser;
     return StreamBuilder(
@@ -97,8 +97,8 @@ class _UserProfilePageState extends State<ProfileScreen> {
 
         builder: (context, snapshot) {
           if (!snapshot.hasData) return Container();
-          List<Activity> current = filterByUser(snapshot.data,cu);
-          debugPrint(current.toString());
+          List<Activity> current = filterByUser(snapshot.data, cu);
+
           final vm = Provider.of<MainViewModel>(context);
 
           return CustomScrollView(primary: false, slivers: <Widget>[
@@ -261,11 +261,12 @@ class _UserProfilePageState extends State<ProfileScreen> {
         });
   }
   List<Activity> filterByUser(List<Activity> temp, User1 currentUser) {
-    debugPrint(currentUser.email);
-    debugPrint(temp.toString());
-    temp.removeWhere((element) => element.user_email!=currentUser.email);
-    debugPrint(temp.toString());
-    return temp;
+    List<Activity> temp2 = new List<Activity>();
+    for (Activity activity in temp) {
+        if (activity.user_email == currentUser.email)
+          temp2.add(activity);
+    }
+    return temp2;
 
   }
 }
