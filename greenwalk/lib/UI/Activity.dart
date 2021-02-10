@@ -199,19 +199,21 @@ class _ActivityScreen extends State<ActivityScreen> {
                                         isRecording = true;
                                         curActivity.avgSpeed=0;
                                         Activitybloc.startCapturing();
-
                                         curActivity.isPrivate = isPrivate;
                                         curActivity.time = details.trackData.latestTime.inSeconds;
-                                        curActivity.coordinates = details.trackData.locations;
+                                        curActivity.coordinates = [];
+
                                         curActivity.distance = details.trackData.totalDistance;
                                         curActivity.steps = details.trackData.steps;
                                         curActivity.AQI = details.trackData.avgAQI;
+
 
                                         Stream stream = Activitybloc.getActivityDetail;
 
 
 
                                         mapMarkerSub = stream.listen((event) {
+                                          curActivity.coordinates.addAll(event.trackData.locations);
 
                                             _markers.add(Marker(
                                                 markerId: MarkerId('Source'),
@@ -311,7 +313,7 @@ class _ActivityScreen extends State<ActivityScreen> {
                                             icon:
                                                 FaIcon(FontAwesomeIcons.camera),
                                             onPressed: () {
-                                              if (isRecording)
+
                                                 getImage().then((value) =>
                                                     uploadImageToFirebase(
                                                         context, _image));
@@ -433,29 +435,27 @@ class _ActivityScreen extends State<ActivityScreen> {
   }
 
   void createRecord(List tks) {
-
-    if (curActivity.distance != 0 && curActivity.time > 10) {
       if (curActivity.images.length == 0) {
         curActivity.images.add("TEST");
       }
       databaseReference.child('activities').push().set({
+        'type': "W",
         "date": curActivity.date,
         "time": curActivity.time,
         "steps": curActivity.steps,
         'distance': curActivity.distance,
         'AQI': curActivity.AQI,
-        "coordinates": curActivity.coordinates,
+        "coordinates": toList(toLatLng(curActivity.coordinates)),
         'avgSpeed': curActivity.avgSpeed,
         'user_email': prefs.getString('email'),
         'images': curActivity.images,
         'isPrivate': curActivity.isPrivate
       });
+
+
       for (String tk in tks) {
         sendAndRetrieveMessage(tk);
       }
-    }
-
-
     Databloc.getData();
   }
 
